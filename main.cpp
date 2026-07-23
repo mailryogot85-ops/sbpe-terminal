@@ -31,6 +31,20 @@ double calcScore(double value, double target, double sigma)
     return exp(-(diff * diff) / (2.0 * sigma * sigma));
 }
 
+// setwはバイト数で幅を数えるため、マルチバイトなブロック文字には使えない。
+// そのため手動でスペースを付けて、数値のスコアマップと桁を揃える。
+string scoreToBlock(double score)
+{
+    string block;
+    if (score >= 0.8) block = "█";
+    else if (score >= 0.6) block = "▓";
+    else if (score >= 0.4) block = "▒";
+    else if (score >= 0.2) block = "░";
+    else block = " ";
+
+    return "     " + block; // 幅6の数値セルに合わせる
+}
+
 int main()
 {
     double coe_x2, coe_x1, coe_y2, coe_y1, coe_xy, cnst;
@@ -178,6 +192,36 @@ int main()
 
         currentY += ystep;
     }
+
+    cout << "\n=== HEATMAP ===\n" << endl;
+
+    cout << setw(8) << "y\\x";
+
+    for (double x = xmin; x <= xmax; x += xstep)
+    {
+        cout << setw(6) << x;
+    }
+
+    cout << endl;
+
+    currentY = ymin;
+
+    for (auto& row : values)
+    {
+        cout << setw(8) << currentY;
+
+        for (double value : row)
+        {
+            double score = calcScore(value, target, sigma);
+            cout << scoreToBlock(score);
+        }
+
+        cout << endl;
+
+        currentY += ystep;
+    }
+
+    cout << "\n凡例: '█'>=0.8 '▓'>=0.6 '▒'>=0.4 '░'>=0.2 ' '<0.2" << endl;
 
     cout << "\n=== SUMMARY ===\n" << endl;
 
